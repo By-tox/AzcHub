@@ -108,8 +108,6 @@ function Library:Window(config)
         Scroll.CanvasSize = UDim2.new(0,0,0,UIList.AbsoluteContentSize.Y + 10)
     end)
 
-    local Toggles = {}
-
     local function ClearContent()
         for _, child in ipairs(Scroll:GetChildren()) do
             if child:IsA("Frame") or child:IsA("TextButton") then
@@ -120,6 +118,9 @@ function Library:Window(config)
 
     local WindowTable = {}
 
+    --------------------------------------------------------------------
+    --                        🔥 نظام تبويبات شغال                       --
+    --------------------------------------------------------------------
     function WindowTable:Tab(name)
         local TabBtn = Instance.new("TextButton", Tabs)
         TabBtn.Size = UDim2.new(1,-20,0,35)
@@ -131,13 +132,21 @@ function Library:Window(config)
         Instance.new("UICorner", TabBtn).CornerRadius = UDim.new(0,8)
 
         local TabTable = {}
+        TabTable.Elements = {} -- ⭐ يخزن عناصر التاب
 
+        -- عند الضغط يظهر محتوى التاب
         TabBtn.MouseButton1Click:Connect(function()
             ClearContent()
+            for _, element in ipairs(TabTable.Elements) do
+                element.Parent = Scroll
+            end
         end)
 
+        ---------------------------------------------------------
+        --                      Button                         --
+        ---------------------------------------------------------
         function TabTable:Button(text, callback)
-            local Btn = Instance.new("TextButton", Scroll)
+            local Btn = Instance.new("TextButton")
             Btn.Size = UDim2.new(1,-20,0,40)
             Btn.BackgroundColor3 = Color3.fromRGB(40,40,40)
             Btn.Font = Silkscreen
@@ -146,10 +155,16 @@ function Library:Window(config)
             Btn.Text = text
             Instance.new("UICorner", Btn).CornerRadius = UDim.new(0,10)
             Btn.MouseButton1Click:Connect(callback)
+
+            table.insert(self.Elements, Btn)
+            return Btn
         end
 
+        ---------------------------------------------------------
+        --                      Toggle                         --
+        ---------------------------------------------------------
         function TabTable:Toggle(info)
-            local Frame = Instance.new("Frame", Scroll)
+            local Frame = Instance.new("Frame")
             Frame.Size = UDim2.new(1,-20,0,45)
             Frame.BackgroundColor3 = Color3.fromRGB(40,40,40)
             Instance.new("UICorner", Frame).CornerRadius = UDim.new(0,10)
@@ -174,19 +189,22 @@ function Library:Window(config)
 
             Btn.MouseButton1Click:Connect(function()
                 state = not state
-
                 TweenService:Create(
                     Btn,
                     TweenInfo.new(0.25),
                     {BackgroundColor3 = state and Color3.fromRGB(255,255,255) or Color3.fromRGB(80,80,80)}
                 ):Play()
-
                 info.Callback(state)
             end)
+
+            table.insert(self.Elements, Frame)
+            return Frame
         end
 
         return TabTable
     end
+
+    --------------------------------------------------------------------
 
     ShowBtn.MouseButton1Click:Connect(function()
         Main.Visible = true
